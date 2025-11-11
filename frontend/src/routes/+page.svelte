@@ -63,14 +63,14 @@
       const form = new FormData();
       form.append('file', file);
       const res = await fetch(`${PUBLIC_API_BASE}/predict`, { method: 'POST', body: form });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      const q = new URLSearchParams({
-        label: data.label ?? '',
-        prob: String(data.prob ?? ''),
-        id: data.request_id ?? ''
-      });
-      goto(`/result?${q.toString()}`);
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(`HTTP ${res.status}: ${msg}`);
+      }
+
+      const { label, prob } = await res.json() as { label: string; prob: number };
+      const params = new URLSearchParams({ label, prob: String(prob) });
+      window.location.href = `/result?${params.toString()}`;
     } catch (e: any) {
       error = e?.message ?? 'อัปโหลดไม่สำเร็จ';
     } finally {
@@ -151,7 +151,7 @@
                 <div class="text-sm truncate text-slate-700 dark:text-slate-300">
                   {file?.name} · {((file?.size ?? 0) / 1024 / 1024).toFixed(2)} MB
                 </div>
-                <button type="button" class="text-xs px-2 py-1 rounded-md border hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800 " on:click={reset} aria-label="ล้างไฟล์">
+                <button type="button" class="text-xs px-2 py-1 rounded-md border hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800 text-white/80" on:click={reset} aria-label="ล้างไฟล์">
                   ล้างไฟล์
                 </button>
               </div>
@@ -169,7 +169,7 @@
         {/if}
 
         <div class="flex items-center gap-3">
-          <button class="px-4 py-2 rounded-xl bg-black text-white hover:opacity-90 disabled:opacity-50" on:click={submit} disabled={uploading || !file}>
+          <button class="px-4 py-2 rounded-xl bg-black text-white border border-white/80 hover:opacity-90 disabled:opacity-50 " on:click={submit} disabled={uploading || !file}>
             {uploading ? 'กำลังอัปโหลด…' : 'Predict'}
           </button>
           <button class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50  text-white" on:click={reset} disabled={uploading || !file}>
