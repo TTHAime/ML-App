@@ -40,18 +40,44 @@ logger.info(f"Loading model from {model_path}…")
 model = tf.keras.models.load_model(model_path)
 logger.info("Model loaded successfully.")
 
+IMAGENET_MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+IMAGENET_STD  = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+
 def preprocess_image(image_bytes: bytes) -> np.ndarray:
     """
-    Resize image to 224×224, convert to float32 and normalize to [0,1].
+    ปรับภาพให้สอดคล้องกับ PyTorch transforms:
+    Resize(shorter side=256) -> CenterCrop(224) -> Grayscale(3) -> Normalize.
     """
-    try:
-        img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    except Exception as e:
-        logger.error(f"Error opening image: {e}")
-        raise HTTPException(status_code=400, detail="Uploaded file is not a valid image.")
-    img = img.resize((224, 224))
+    # โหลดและแปลงภาพเป็น RGB
+    img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+
+    # Resize: ย่อขนาดโดยรักษาอัตราส่วนให้ด้านสั้นเป็น 256 พิกเซล
+    short_side = 256
+    w, h = img.size
+    if w < h:
+        new_w, new_h = short_side, int(h * short_side / w)
+    else:
+        new_h, new_w = short_side, int(w * short_side / h)
+    img = img.resize((new_w, new_h), Image.BILINEAR)
+
+    # CenterCrop 224x224
+    left = (img.width - 224) / 2
+    top = (img.height - 224) / 2
+    right = left + 224
+    bottom = top + 224
+    img = img.crop((left, top, right, bottom))
+
+    # Grayscale to 3-channel: แปลงเป็นภาพขาวดำหนึ่งช่องแล้วซ้ำเป็น 3 ช่อง
+    gray = img.convert("L")
+    img = Image.merge("RGB", (gray, gray, gray))
+
+    # ToTensor + Normalize: แปลงเป็นอาร์เรย์ float32 ช่วง [0,1]
     x = np.asarray(img, dtype=np.float32) / 255.0
-    return np.expand_dims(x, axis=0)
+    # Normalize per-channel ตาม ImageNet:contentReference[oaicite:1]{index=1}
+    x = (x - IMAGENET_MEAN) / IMAGENET_STD
+   
+    # เพิ่มมิติ batch (1, 224, 224, 3)
+    return x[None, ...].astype(np.float32)
 
 class PredictionResponse(BaseModel):
     label: str
