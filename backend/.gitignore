@@ -30,8 +30,6 @@ dist/
 .env.*
 
 # Model files or large data # models
-model/
-*.keras
 *.h5
 *.onnx
 *.tflite

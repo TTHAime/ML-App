@@ -8,6 +8,7 @@ import tensorflow as tf
 import io
 import os
 import logging
+from tensorflow.keras.applications.efficientnet import preprocess_input as eff_preprocess
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -32,7 +33,7 @@ class_names = os.environ.get("CLASS_NAMES", "no_crack,crack").split(",")
 THRESHOLD = float(os.environ.get("THRESHOLD", "0.5"))
 
 # Load Keras model from environment or default filename
-model_path = os.environ.get("MODEL_FILENAME", "model/ResNet50V2_model.keras")
+model_path = os.environ.get("MODEL_FILENAME", "model/efficientNetB0.keras")
 if not os.path.exists(model_path):
     logger.error(f"Model file {model_path} not found")
     raise RuntimeError(f"Model file {model_path} not found")
@@ -52,7 +53,7 @@ def preprocess_image(image_bytes: bytes) -> np.ndarray:
     img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
 
     # Resize: ย่อขนาดโดยรักษาอัตราส่วนให้ด้านสั้นเป็น 256 พิกเซล
-    short_side = 256
+    short_side = 224
     w, h = img.size
     if w < h:
         new_w, new_h = short_side, int(h * short_side / w)
@@ -72,10 +73,14 @@ def preprocess_image(image_bytes: bytes) -> np.ndarray:
     img = Image.merge("RGB", (gray, gray, gray))
 
     # ToTensor + Normalize: แปลงเป็นอาร์เรย์ float32 ช่วง [0,1]
-    x = np.asarray(img, dtype=np.float32) / 255.0
-    # Normalize per-channel ตาม ImageNet:contentReference[oaicite:1]{index=1}
-    x = (x - IMAGENET_MEAN) / IMAGENET_STD
-   
+    # x = np.asarray(img, dtype=np.float32) / 255.0
+    # # Normalize per-channel ตาม ImageNet:contentReference[oaicite:1]{index=1}
+    # x = (x - IMAGENET_MEAN) / IMAGENET_STD
+
+    # For EfficientNet
+    x = np.asarray(img, dtype=np.float32)             # 0..255
+    x = eff_preprocess(x)                             # for EfficientNet
+
     # เพิ่มมิติ batch (1, 224, 224, 3)
     return x[None, ...].astype(np.float32)
 
