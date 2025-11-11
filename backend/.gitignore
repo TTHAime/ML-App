@@ -1,0 +1,39 @@
+# Python virtual environments
+.env
+.venv
+env/
+venv/
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+
+# IDE/editor settings
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Node.js dependencies and build output
+node_modules/
+.svelte-kit/
+# ถ้ามีโฟลเดอร์ build อื่น ๆ เช่น dist หรือ build สำหรับ front‑end ก็ ignore ด้วย
+build/
+dist/
+
+# Environment files (private secrets)
+.env
+.env.*
+
+# Model files or large data # models
+model/
+*.keras
+*.h5
+*.onnx
+*.tflite
+checkpoints/
+artifacts/

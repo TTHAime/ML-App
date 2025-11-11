@@ -1,0 +1,31 @@
+# ไม่ส่งโฟลเดอร์ Git เข้าไปใน build context
+.git
+.gitignore
+.dockerignore
+
+# ไฟล์/โฟลเดอร์ของ editor/IDE
+.idea/
+.vscode/
+
+# ไฟล์ระบบ
+.DS_Store
+Thumbs.db
+
+# Python virtual environment และไฟล์คอมไพล์
+.env
+.venv
+env/
+venv/
+__pycache__/
+*.py[cod]
+
+# Node dependencies และไฟล์ build ของ front‑end
+node_modules/
+.svelte-kit/
+build/
+dist/
+
+# ไฟล์อื่น ๆ ที่ไม่จำเป็นต่อการ build
+slides/
+tests/
+*.log
