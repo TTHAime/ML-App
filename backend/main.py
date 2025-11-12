@@ -33,7 +33,7 @@ class_names = os.environ.get("CLASS_NAMES", "no_crack,crack").split(",")
 THRESHOLD = float(os.environ.get("THRESHOLD", "0.5"))
 
 # Load Keras model from environment or default filename
-model_path = os.environ.get("MODEL_FILENAME", "model/efficientNetB0.keras")
+model_path = os.environ.get("MODEL_FILENAME", "model/efficientNetB0_augment.keras")
 if not os.path.exists(model_path):
     logger.error(f"Model file {model_path} not found")
     raise RuntimeError(f"Model file {model_path} not found")
