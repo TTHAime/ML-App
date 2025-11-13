@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 COPY main.py ./main.py
-COPY model/ResNet50V2_model.keras ./ResNet50V2_model.keras
+COPY model/efficientNetB0_augment.keras ./model/efficientNetB0_augment.keras
 
 
 ENV MODEL_FILENAME=ResNet50V2_model.keras
