@@ -17,7 +17,6 @@ COPY main.py ./main.py
 COPY model/efficientNetB0_augment.keras ./model/efficientNetB0_augment.keras
 
 
-ENV MODEL_FILENAME=ResNet50V2_model.keras
 
 EXPOSE 8000
 
